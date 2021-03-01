@@ -8,7 +8,7 @@ class SmsModel extends Model
     protected $primaryKey       = 'id';
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms'];
+    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora'];
     protected $useTimestamps    = false;
     protected $skipValidation   = true;
 
@@ -20,21 +20,53 @@ class SmsModel extends Model
      */
     public function salvarRelatorio($data_arr)
     {
-        
-        switch ($data_arr['idOp']) {
-            case '1':
-                // BestVoice
+        $notOp = FALSE;        
+        $save_data =[];
+
+        // Verifica a operadora que enviou a partir da variável
+        // de POST idOp, que é um número inteiro.
+        switch (intval($data_arr['idOp'])) {
+            case 1:
+                // BestVoice     
+                $id = explode('"', $data_arr['status'])[3];
+                
+                $save_data = [
+                    "celular" => $data_arr['numero'],
+                    "mensagem"=> $data_arr['mensagem'],
+                    "clienteid" => $data_arr['clienteid'],
+                    "idsms" => $id,
+                    "operadora" => 'BestVoice'
+                ];              
                 break;
             
-            case '2':
+            case 2:
                 // Zenvia
+                $save_data = [
+                    "celular" => $data_arr['numero'],
+                    "mensagem"=> $data_arr['mensagem'],
+                    "clienteid" => $data_arr['clienteid'],
+                    "idsms" => 'Zenvia',
+                    "operadora" => 'Zenvia'
+                ];
                 break;
 
             default:
-                $result = "Operadora não reconhecida";
+                $notOp = TRUE;                
                 break;
         }
-
-        return $result;
+        
+        // Se houver uma operadora registrada, salvar o registro.
+        if(!$notOp)
+        {            
+            try {
+                $this->insert($save_data);                
+            } catch (\Exception $err) {
+                throw $err;                
+            } 
+        } else {
+            return "Operadora não encontrada";            
+        }
+                
+        return "Salvamento completo";
     }
 }
