@@ -8,9 +8,12 @@ class SmsModel extends Model
     protected $primaryKey       = 'id';
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora'];
-    protected $useTimestamps    = false;
+    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora', 'criado_em', 'atualizado_em'];    
     protected $skipValidation   = true;
+
+    protected $useTimestamps = true;
+    protected $createdField  = 'criado_em';
+    protected $updatedField  = 'atualizado_em';
 
     /**
      * Identifica a operadora do SMS e trata da maneira
