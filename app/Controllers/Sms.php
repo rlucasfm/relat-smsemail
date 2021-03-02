@@ -42,4 +42,38 @@ class Sms extends BaseController
             return $this->response;
         }
 	}
+
+    /**
+     * 
+     * Rotina para avaliar o status das mensagens não avaliadas.
+     * Deve ser utilizado em conjunto com CRON Jobs.
+     * 
+     * @var string
+     */
+    public function avaliarBestVoice()
+    {
+        $sms = new SmsModel();
+        try {            
+            $result = $sms->avaliarBestVoice();
+        } catch (\Exception $th) {
+            $result = $th->getMessage();
+        }
+        $this->createLog($result);
+    }
+
+    /**
+     * 
+     * Procedimento para gerar os LOGS 
+     * referentes aos CRON Jobs.
+     * Pasta writeable/cron
+     * 
+     * @var void
+     */
+    private function createLog($tolog)
+    {
+        $logName = 'log-'.date('Y-m-d').'.log';
+        //if(file_exists(WRITEPATH."cron\\".$logName)) 
+        file_put_contents("../../richard-apps/relat-smsemail/writable/logs/cron/".$logName, $tolog, FILE_APPEND);
+        
+    }
 }

@@ -8,7 +8,7 @@ class SmsModel extends Model
     protected $primaryKey       = 'id';
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora', 'criado_em', 'atualizado_em'];    
+    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora', 'statusDesc', 'statusConf', 'avaliado', 'criado_em', 'atualizado_em'];    
     protected $skipValidation   = true;
 
     protected $useTimestamps = true;
@@ -37,8 +37,11 @@ class SmsModel extends Model
                     "celular" => $data_arr['numero'],
                     "mensagem"=> $data_arr['mensagem'],
                     "clienteid" => $data_arr['clienteid'],
-                    "idsms" => $id,
-                    "operadora" => 'BestVoice'
+                    "idsms" => str_replace('=','', trim($id)),
+                    "operadora" => 'BestVoice',
+                    "statusDesc" => "",
+                    "statusConf" => "",
+                    "avaliado" => 0
                 ];              
                 break;
             
@@ -49,7 +52,10 @@ class SmsModel extends Model
                     "mensagem"=> $data_arr['mensagem'],
                     "clienteid" => $data_arr['clienteid'],
                     "idsms" => 'Zenvia',
-                    "operadora" => 'Zenvia'
+                    "operadora" => 'Zenvia',
+                    "statusDesc" => "",
+                    "statusConf" => "",
+                    "avaliado" => 0
                 ];
                 break;
 
@@ -71,5 +77,53 @@ class SmsModel extends Model
         }
                 
         return "Salvamento completo";
+    }
+
+    public function avaliarBestVoice()
+    {
+        $curl = \Config\Services::curlrequest();
+        $usuario = 'MOTAESILVA';
+        $chave = 'B3stV0z84';
+
+        // Encontra os registros BestVoice por avaliar
+        $naoAvaliados = $this->where('avaliado', 0)
+                            ->where('operadora', 'BestVoice')
+                            ->findAll();
+        $err_arr = [];
+        
+        // Requere da API as informações de cada registro por ID
+        foreach($naoAvaliados as $nv)
+        {            
+            try {
+                $response = $curl->setBody(json_encode(['id' => $nv->idsms]))
+                                ->request('POST', 'http://apishort.bestvoice.com.br/bot/consulta-sms-status.php', 
+                                ['headers' => [
+                                    'usuario'   => $usuario,
+                                    'chave'     => $chave
+                                ]]);         
+                $sms_info = json_decode($response->getBody());
+
+                $statusDesc = $sms_info->statusDescricao;
+                $statusConf = $sms_info->confirmacaoDescricao;
+
+                // Atualização de INFO no DB
+                $data_update = [
+                    'id'         => $nv->id,
+                    'statusDesc' => $statusDesc,
+                    'statusConf' => $statusConf,
+                    'avaliado'   => 1
+                ];
+                $this->save($data_update);
+
+            } catch (\Exception $err) {
+                // Registro de erro individual
+                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+            }            
+        }
+
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer"          : $return ;               
+        return $return;
+        
     }
 }
