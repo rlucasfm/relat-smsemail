@@ -80,9 +80,7 @@ class SmsModel extends Model
     }
 
     public function avaliarBestVoice()
-    {
-        date_default_timezone_set('America/Fortaleza');
-
+    {        
         $curl = \Config\Services::curlrequest();
         $usuario = 'MOTAESILVA';
         $chave = 'B3stV0z84';

@@ -50,15 +50,17 @@ class Sms extends BaseController
      * 
      * @var string
      */
-    public function avaliarBestVoice()
+    public function avaliarSMS()
     {
         $sms = new SmsModel();
+
+        // Realiza avaliação dos SMS BestVoice
         try {            
-            $result = $sms->avaliarBestVoice();
+            $resultBV = $sms->avaliarBestVoice();
         } catch (\Exception $th) {
-            $result = $th->getMessage();
+            $resultBV = $th->getMessage();
         }
-        $this->createLog($result);
+        $this->createLog($resultBV);
     }
 
     /**
