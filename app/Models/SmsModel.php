@@ -19,6 +19,8 @@ class SmsModel extends Model
      * Identifica a operadora do SMS e trata da maneira
      * correta, salvando a informação no banco de dados.
      * 
+     * Retorna um status informativo.
+     * 
      * @var string
      */
     public function salvarRelatorio($data_arr)
@@ -79,6 +81,15 @@ class SmsModel extends Model
         return "Salvamento completo";
     }
 
+     /**
+     * Avalia os registros em DB que ainda não tem
+     * retorno da operadora (BestVoice) e atualiza
+     * os seus status.
+     * 
+     * Retorna logs de sucesso ou erro.
+     * 
+     * @var string
+     */
     public function avaliarBestVoice()
     {        
         $curl = \Config\Services::curlrequest();
@@ -121,6 +132,7 @@ class SmsModel extends Model
             }            
         }
 
+        // Casos de sucesso, alterações completas ou sem alterações a fazer.
         $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações"   : $err_arr;  
         $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer"          : $return ;               
         return $return;

@@ -12,7 +12,7 @@ class Sms extends BaseController
      * Detecta e responde requisições, garantindo que apenas
      * POST será levado ao modelo.
      * 
-     * @var void
+     * @var response
      */
 	public function index()
 	{
@@ -48,7 +48,7 @@ class Sms extends BaseController
      * Rotina para avaliar o status das mensagens não avaliadas.
      * Deve ser utilizado em conjunto com CRON Jobs.
      * 
-     * @var string
+     * @var void
      */
     public function avaliarSMS()
     {

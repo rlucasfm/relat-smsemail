@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\SmsModel;
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -9,17 +11,16 @@ class Relatorio extends BaseController
 {
 	public function index()
 	{
-		$spreadsheet = new Spreadsheet();
-		$sheet = $spreadsheet->getActiveSheet();
-		$sheet->setCellValue('A1', 'Hello World!');
+		$sms = new SmsModel();
 
-		$writer = new Xlsx($spreadsheet);
-		$filename = date("Y-m-d_h-i-s").".xlsx";
+		$data = [
+			'titulo' => "Relatórios de envio"
+		];
 
-		$writer->save('../../richard-apps/relat-smsemail/writable/sheets/'.$filename);
+		echo view('relatorios', $data);
 	}
 
-	public function download()
+	private function downloadSheet($data_arr)
 	{
 		$spreadsheet = new Spreadsheet();
 		$sheet = $spreadsheet->getActiveSheet();
@@ -27,12 +28,13 @@ class Relatorio extends BaseController
 		
 		$writer = new Xlsx($spreadsheet);
 		
-		$filename = 'name-of-the-generated-file';
+		$filename = 'relatorio-sms';
 		
-		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"'); 
 		header('Cache-Control: max-age=0');
 		
 		$writer->save('php://output'); // download file 
+		die;
 	}
 }
