@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
     <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>    
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     
 </head>
@@ -21,17 +22,48 @@
         </div>
     </section>
 
-    <div class="container is-fluid mt-2">
+    <div class="container is-fluid mt-4">
         <div class="columns">
-            <div class="column is-6">
+            <div class="column is-8">
                 <div class="card">
                     <header class="card-header">
-                        <p class="card-header-title">
-                            OVERVIEW MENSAL
-                        </p>
+                        <div class="container is-fluid">
+                            <div class="columns">
+                                <div class="column is-two-fifths">
+                                    <p class="card-header-title">
+                                        OVERVIEW MENSAL                           
+                                    </p>
+                                </div>
+                                <div class="column mb-2">                                    
+                                    <div class="columns is-desktop">
+                                        <div class="column is-one-third">
+                                            <div class="field">
+                                                <label for="label">Data Início</label>
+                                                <div class="control">
+                                                    <input type="date" class="input" id="datainicio" value="<?php echo date('Y-m-d'); ?>">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column is-one-third">
+                                            <div class="field">
+                                                <label for="label">Data Fim</label>
+                                                <div class="control">
+                                                    <input type="date" class="input" id="datafim" value="<?php echo date('Y-m-d'); ?>">
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="column is-one-third" style="display: flex; align-items:center">
+                                            <div class="field">
+                                                <button type="button" class="button is-primary" id="btnBuscar">Buscar</button>
+                                            </div>
+                                        </div>                                       
+                                    </div>                                    
+                                </div>
+                            </div>                        
+                        </div>                        
                     </header>
                     <div class="card-content">
-                        <div class="columns">
+                        <div class="columns is-mobile">
                             <div class="column">
                                 <div class="has-text-centered">
                                     <i class="bx bx-user mr-25 align-middle"></i>
@@ -44,14 +76,14 @@
                                     <i class="bx bx-user mr-25 align-middle"></i>
                                     Não enviados
                                 </div>
-                                <div class="nao-avaliados"></div>
+                                <div class="envio-incompleto"></div>
                             </div>
                             <div class="column">
                                 <div class="has-text-centered">
                                     <i class="bx bx-user mr-25 align-middle"></i>
-                                    Não avaliados
+                                    Aguardando
                                 </div>
-                                <div class="nao-enviados"></div>
+                                <div class="nao-avaliados"></div>
                             </div>
                         </div>
                         <div class="columns">
@@ -62,17 +94,98 @@
                     </div>
                 </div>
             </div>
+            <div class="column">
+                <div class="card">
+                    <div class="card-content">                        
+                        <div class="columns">
+                            Exporte a tabela com os dados entre as datas escolhidas
+                        </div>
+                        <div class="columns">
+                            <div class="column has-text-centered">                            
+                                <button type="button" class="button is-success" id="btnExport">Exportar XLSX</button>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>    
     </div> 
-    
-<!-- BAR CHART -->
+
 <script>
+    $('#btnExport').on('click', () => {
+        let form = $(document.createElement('form'));
+
+        form.attr('action', 'relatorio/downloadSheet');
+        form.attr('method', 'POST');
+        form.attr('target', '_blank');
+        let datainicio = $('<input>').attr('type', 'hidden').attr('name', 'datainicio').val($('#datainicio').val());
+        let datafim = $('<input>').attr('type', 'hidden').attr('name', 'datafim').val($('#datafim').val());
+        form.append(datainicio);
+        form.append(datafim);
+        form.appendTo(document.body);
+        form.submit();
+        form.remove();
+    });
+</script>
+
+<!-- AJAX BUSCAR -->
+<script>    
+    let enviados = 0;
+    let naoavaliados = 0;
+    let naoenviados = 0;    
+
+    $('#btnBuscar').on('click', () => {        
+
+        $.ajax({
+            method: "POST",
+            url: "relatorio/buscarDatas",
+            data: {dataInicio: $('#datainicio').val(), dataFim: $('#datafim').val()},
+        }).done((data) => {
+            enviados = 0;
+            naoavaliados = 0;
+            naoenviados = 0; 
+            reg_arr = JSON.parse(data);                         
+
+            reg_arr.forEach((obj) => {
+                if(obj.statusDesc == 'ENVIADA'){
+                    enviados++;
+                }
+
+                if(obj.statusConf == 'NAO_ENTREGUE' || obj.statusDesc == 'DESCONHECIDO' || obj.statusDesc == 'REJEITADA'){
+                    naoenviados++;
+                }
+
+                if(obj.avaliado == '0'){
+                    naoavaliados++;
+                }
+            });
+
+            chart.updateSeries([{
+                name: 'SMS BestVoice',
+                data: [enviados,naoenviados,naoavaliados]
+            }]);
+
+            rad1.updateSeries([100*enviados/(enviados+naoenviados+naoavaliados)]);
+
+            rad2.updateSeries([(100*(naoenviados))/(enviados+naoenviados+naoavaliados)]);
+
+            rad3.updateSeries([100*naoavaliados/(enviados+naoenviados+naoavaliados)]);
+
+        }).fail((jqxhr, textStatus) => {
+            console.log(textStatus);
+        });
+    });    
+</script>
+
+<!-- BAR CHART -->
+<script>            
     let optionsBar = {
         chart: {
             type: 'bar',
             animations: {
                 speed: 600
-            }
+            },
+            height: 300
         },
         dataLabels: {
             enabled: false
@@ -84,10 +197,10 @@
         },
         series: [{
             name: 'SMS BestVoice',
-            data: [80,40,120,0]
+            data: [enviados,naoenviados,naoavaliados]
         }],
         xaxis: {
-            categories: ['Enviados', 'Não enviados', 'Não avaliados', 'Erro ao enviar']
+            categories: ['Enviados', 'Não enviados', 'Aguardando']
         },
         theme: {
             palette: 'palette1'
@@ -97,93 +210,88 @@
     let chart = new ApexCharts(document.querySelector(".graph1"), optionsBar);
     chart.render();
 
-</script>
-
-<!-- RADIAL ENVIADOS -->
-<script>
-var optRad1 = {
-          series: [30],
-          chart: {
-          height: 100,
-          type: 'radialBar',
-        },
-        plotOptions: {
-          radialBar: {
-            dataLabels: {
-                value: {
-                    fontSize: '0px'
-                }
-            },      
-            hollow: {
-                size: '50%',
+    // <!-- RADIAL ENVIADOS -->
+    var optRad1 = {
+        series: [100*enviados/(enviados+naoenviados+naoavaliados)],
+        chart: {
+        height: 100,
+        type: 'radialBar',
+    },
+    plotOptions: {
+        radialBar: {
+        dataLabels: {
+            value: {
+                fontSize: '0px'
             }
-          },
+        },      
+        hollow: {
+            size: '50%',
+        }
         },
-        labels: ['']
-        };
+    },
+    labels: ['']
+    };
 
-        var rad1 = new ApexCharts(document.querySelector(".enviados"), optRad1);
-        rad1.render();
-</script>
+    var rad1 = new ApexCharts(document.querySelector(".enviados"), optRad1);
+    rad1.render();
 
-<!-- RADIAL NÃO ENVIADOS -->
-<script>
-var optRad1 = {
-          series: [30],
-          chart: {
-          height: 100,
-          type: 'radialBar',
-        },
-        plotOptions: {
-          radialBar: {
-            dataLabels: {
-                value: {
-                    fontSize: '0px'
-                }
-            },      
-            hollow: {
-                size: '50%',
+    // <!-- RADIAL ENVIO INCOMPLETO -->
+    var optRad2 = {
+        series: [(100*(naoenviados))/(enviados+naoenviados+naoavaliados)],
+        chart: {
+        height: 100,
+        type: 'radialBar',
+    },
+    plotOptions: {
+        radialBar: {
+        dataLabels: {
+            value: {
+                fontSize: '0px'
             }
-          },
+        },      
+        hollow: {
+            size: '50%',
+        }
         },
-        fill: {
-            colors: ['#FEB019']
-        },
-        labels: ['']
-        };
+    },
+    fill: {
+        colors: ['#00E396']
+    },
+    labels: ['']
+    };
 
-        var rad1 = new ApexCharts(document.querySelector(".nao-enviados"), optRad1);
-        rad1.render();
-</script>
+    var rad2 = new ApexCharts(document.querySelector(".envio-incompleto"), optRad2);
+    rad2.render();
 
-<!-- RADIAL NÃO AVALIADOS -->
-<script>
-var optRad1 = {
-          series: [30],
-          chart: {
-          height: 100,
-          type: 'radialBar',
-        },
-        plotOptions: {
-          radialBar: {
-            dataLabels: {
-                value: {
-                    fontSize: '0px'
-                }
-            },      
-            hollow: {
-                size: '50%'                
+    // <!-- RADIAL NÃO AVALIADOS -->
+    var optRad3 = {
+        series: [100*naoavaliados/(enviados+naoenviados+naoavaliados)],
+        chart: {
+        height: 100,
+        type: 'radialBar',
+    },
+    plotOptions: {
+        radialBar: {
+        dataLabels: {
+            value: {
+                fontSize: '0px'
             }
-          },
+        },      
+        hollow: {
+            size: '50%'                
+        }
         },
-        fill: {
-            colors: ['#00E396']
-        },
-        labels: ['']
-        };
+    },
+    fill: {
+        colors: ['#FEB019']
+    },
+    labels: ['']
+    };
 
-        var rad1 = new ApexCharts(document.querySelector(".nao-avaliados"), optRad1);
-        rad1.render();
+    var rad3 = new ApexCharts(document.querySelector(".nao-avaliados"), optRad3);
+    rad3.render();
+
+    
 </script>
 
 </body>

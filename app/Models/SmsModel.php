@@ -138,4 +138,23 @@ class SmsModel extends Model
         return $return;
         
     }
+
+    /**
+     * Busca no banco de dados as informações
+     * entre as dadas requisitadas
+     * 
+     * @var array
+     */
+    public function buscarDatas($dataInicio, $dataFim)
+    {
+        try {
+            $data = $this->where('criado_em >=', $dataInicio)
+                        ->where('criado_em <=', $dataFim)
+                        ->findAll();                        
+        } catch (\Exception $err) {
+            throw $err;
+        }        
+
+        return $data;
+    }
 }
