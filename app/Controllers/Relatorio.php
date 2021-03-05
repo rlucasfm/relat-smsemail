@@ -66,28 +66,36 @@ class Relatorio extends BaseController
 		$id_banco = $this->request->getPost('id_banco');
 
 		$regs = $sms->buscarDatas($datainicio, $datafim, $id_banco);
+
+		$sheet->setCellValue('A1', 'Operadora');
+		$sheet->setCellValue('B1', 'Data de envio');
+		$sheet->setCellValue('C1', 'Hora de envio');
+		$sheet->setCellValue('D1', 'ID Banco');
+		$sheet->setCellValue('E1', 'ID Cliente');
+		$sheet->setCellValue('F1', 'Celular');
+		$sheet->setCellValue('G1', 'Mensagem');		
+		$sheet->setCellValue('H1', 'ID SMS');
+		$sheet->setCellValue('I1', 'Status Descritivo');
+		$sheet->setCellValue('J1', 'Status Confirmação');
 		
-		$sheet->setCellValue('A1', 'Celular');
-		$sheet->setCellValue('B1', 'Mensagem');
-		$sheet->setCellValue('C1', 'ID Cliente');
-		$sheet->setCellValue('D1', 'ID SMS');
-		$sheet->setCellValue('E1', 'ID Banco');
-		$sheet->setCellValue('F1', 'Operadora');
-		$sheet->setCellValue('G1', 'Status Descritivo');
-		$sheet->setCellValue('H1', 'Status Confirmação');
-		$sheet->setCellValue('I1', 'Data de envio');
 
 		$index = 2;
 		foreach($regs as $reg){
-			$sheet->setCellValue("A$index", $reg->celular);
-			$sheet->setCellValue("B$index", $reg->mensagem);
-			$sheet->setCellValue("C$index", $reg->clienteid);
-			$sheet->setCellValue("D$index", $reg->idsms);
-			$sheet->setCellValue("E$index", $reg->id_banco);
-			$sheet->setCellValue("F$index", $reg->operadora);
-			$sheet->setCellValue("G$index", $reg->statusDesc);
-			$sheet->setCellValue("H$index", $reg->statusConf);
-			$sheet->setCellValue("I$index", $reg->criado_em);
+			$dataCriado = new \DateTime($reg->criado_em);
+			$horaCriado = $dataCriado->format('H:i:s');
+			$dataCriado = $dataCriado->format('d/m/Y');
+
+			$sheet->setCellValue("A$index", $reg->operadora);
+			$sheet->setCellValue("B$index", $dataCriado);
+			$sheet->setCellValue("C$index", $horaCriado);
+			$sheet->setCellValue("D$index", $reg->id_banco);
+			$sheet->setCellValue("E$index", $reg->clienteid);
+			$sheet->setCellValue("F$index", $reg->celular);
+			$sheet->setCellValue("G$index", $reg->mensagem);			
+			$sheet->setCellValue("H$index", $reg->idsms);
+			$sheet->setCellValue("I$index", $reg->statusDesc);
+			$sheet->setCellValue("J$index", $reg->statusConf);
+
 			$index++;
 		}
 

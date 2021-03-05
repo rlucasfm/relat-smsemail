@@ -77,14 +77,14 @@
                             <div class="column">
                                 <div class="has-text-centered">
                                     <i class="bx bx-user mr-25 align-middle"></i>
-                                    Enviados
+                                    Confirmados
                                 </div>                                
                                 <div class="enviados"></div>
                             </div>
                             <div class="column">
                                 <div class="has-text-centered">
                                     <i class="bx bx-user mr-25 align-middle"></i>
-                                    Não enviados
+                                    Não entregues
                                 </div>
                                 <div class="envio-incompleto"></div>
                             </div>
@@ -212,7 +212,7 @@
             data: [enviados,naoenviados,naoavaliados]
         }],
         xaxis: {
-            categories: ['Enviados', 'Não enviados', 'Aguardando']
+            categories: ['Confirmados', 'Não entregues', 'Aguardando']
         },
         theme: {
             palette: 'palette1'
