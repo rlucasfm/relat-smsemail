@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Controllers;
+use App\Models\SmsModel;
 
 class Home extends BaseController
 {
 	public function index()
 	{
-		return view('welcome_message');
+		return 0;
 	}
 }

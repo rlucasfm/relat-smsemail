@@ -8,7 +8,7 @@ class SmsModel extends Model
     protected $primaryKey       = 'id';
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
-    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora', 'statusDesc', 'statusConf', 'avaliado', 'criado_em', 'atualizado_em'];    
+    protected $allowedFields    = ['id', 'celular', 'mensagem', 'clienteid', 'idsms', 'operadora', 'statusDesc', 'statusConf', 'id_banco', 'avaliado', 'criado_em', 'atualizado_em'];    
     protected $skipValidation   = true;
 
     protected $useTimestamps = true;
@@ -37,12 +37,13 @@ class SmsModel extends Model
                 
                 $save_data = [
                     "celular" => $data_arr['numero'],
-                    "mensagem"=> $data_arr['mensagem'],
+                    "mensagem"=> substr($data_arr['mensagem'], 0, -3),
                     "clienteid" => $data_arr['clienteid'],
                     "idsms" => str_replace('=','', trim($id)),
                     "operadora" => 'BestVoice',
                     "statusDesc" => "",
                     "statusConf" => "",
+                    "id_banco" => $data_arr['idBanco'],
                     "avaliado" => 0
                 ];              
                 break;
@@ -51,12 +52,13 @@ class SmsModel extends Model
                 // Zenvia
                 $save_data = [
                     "celular" => $data_arr['numero'],
-                    "mensagem"=> $data_arr['mensagem'],
+                    "mensagem"=> substr($data_arr['mensagem'], 0, -3),
                     "clienteid" => $data_arr['clienteid'],
                     "idsms" => 'Zenvia',
                     "operadora" => 'Zenvia',
                     "statusDesc" => "",
                     "statusConf" => "",
+                    "id_banco" => $data_arr['idBanco'],
                     "avaliado" => 0
                 ];
                 break;
@@ -145,12 +147,20 @@ class SmsModel extends Model
      * 
      * @var array
      */
-    public function buscarDatas($dataInicio, $dataFim)
+    public function buscarDatas($dataInicio, $dataFim, $id_banco)
     {
         try {
-            $data = $this->where('criado_em >=', $dataInicio)
-                        ->where('criado_em <=', $dataFim)
-                        ->findAll();                        
+            if($id_banco == "")
+            {
+                $data = $this->where('criado_em >=', $dataInicio)
+                            ->where('criado_em <=', $dataFim)
+                            ->findAll();                        
+            } else {
+                $data = $this->where('criado_em >=', $dataInicio)
+                            ->where('criado_em <=', $dataFim)
+                            ->where('id_banco =', $id_banco)
+                            ->findAll();                        
+            }
         } catch (\Exception $err) {
             throw $err;
         }        

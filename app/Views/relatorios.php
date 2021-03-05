@@ -29,32 +29,42 @@
                     <header class="card-header">
                         <div class="container is-fluid">
                             <div class="columns">
-                                <div class="column is-two-fifths">
+                                <div class="column">
                                     <p class="card-header-title">
                                         OVERVIEW MENSAL                           
                                     </p>
                                 </div>
+                            </div>
+                            <div class="columns">
                                 <div class="column mb-2">                                    
                                     <div class="columns is-desktop">
-                                        <div class="column is-one-third">
+                                        <div class="column">
                                             <div class="field">
-                                                <label for="label">Data Início</label>
+                                                <label for="datainicio">Data Início</label>
                                                 <div class="control">
                                                     <input type="date" class="input" id="datainicio" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="column is-one-third">
+                                        <div class="column">
                                             <div class="field">
-                                                <label for="label">Data Fim</label>
+                                                <label for="datafim">Data Fim</label>
                                                 <div class="control">
                                                     <input type="date" class="input" id="datafim" value="<?php echo date('Y-m-d'); ?>">
                                                 </div>
                                             </div>
                                         </div> 
-                                        <div class="column is-one-third" style="display: flex; align-items:center">
+                                        <div class="column">
                                             <div class="field">
-                                                <button type="button" class="button is-primary" id="btnBuscar">Buscar</button>
+                                                <label for="banco">Banco</label>
+                                                <div class="control">
+                                                    <input type="number" class="input" id="banco">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column" style="display: flex; align-items:center">
+                                            <div class="field">                                                
+                                                <button type="button" class="button is-primary mt-5" id="btnBuscar">Buscar</button>
                                             </div>
                                         </div>                                       
                                     </div>                                    
@@ -120,8 +130,10 @@
         form.attr('target', '_blank');
         let datainicio = $('<input>').attr('type', 'hidden').attr('name', 'datainicio').val($('#datainicio').val());
         let datafim = $('<input>').attr('type', 'hidden').attr('name', 'datafim').val($('#datafim').val());
+        let banco = $('<input>').attr('type', 'hidden').attr('name', 'id_banco').val($('#banco').val());
         form.append(datainicio);
         form.append(datafim);
+        form.append(banco);
         form.appendTo(document.body);
         form.submit();
         form.remove();
@@ -139,7 +151,7 @@
         $.ajax({
             method: "POST",
             url: "relatorio/buscarDatas",
-            data: {dataInicio: $('#datainicio').val(), dataFim: $('#datafim').val()},
+            data: {dataInicio: $('#datainicio').val(), dataFim: $('#datafim').val(), id_banco: $('#banco').val()},
         }).done((data) => {
             enviados = 0;
             naoavaliados = 0;
@@ -147,7 +159,7 @@
             reg_arr = JSON.parse(data);                         
 
             reg_arr.forEach((obj) => {
-                if(obj.statusDesc == 'ENVIADA'){
+                if(obj.statusConf == 'CONFIRMADO'){
                     enviados++;
                 }
 
@@ -161,7 +173,7 @@
             });
 
             chart.updateSeries([{
-                name: 'SMS BestVoice',
+                name: 'SMS',
                 data: [enviados,naoenviados,naoavaliados]
             }]);
 
@@ -196,7 +208,7 @@
             }
         },
         series: [{
-            name: 'SMS BestVoice',
+            name: 'SMS',
             data: [enviados,naoenviados,naoavaliados]
         }],
         xaxis: {
