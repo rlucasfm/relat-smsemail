@@ -2,11 +2,13 @@
 
 namespace App\Controllers;
 use App\Models\SmsModel;
+use App\Models\Usuarios;
 
 class Home extends BaseController
 {
 	public function index()
 	{
-		return 0;
+		$user = new Usuarios();
+		var_dump($user->achar(1));
 	}
 }
