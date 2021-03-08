@@ -9,6 +9,12 @@ class Home extends BaseController
 	public function index()
 	{
 		$user = new Usuarios();
-		var_dump($user->achar(1));
+		try {
+			echo "<pre>"; 
+			var_dump($user->achar(1));
+			echo "</pre>";
+		} catch (\Exception $th) {
+			echo $th->getMessage();
+		}
 	}
 }

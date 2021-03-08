@@ -56,11 +56,33 @@ class Sms extends BaseController
 
         // Realiza avaliação dos SMS BestVoice
         try {            
-            $resultBV = $sms->avaliarBestVoice();
+            $resultBV = $sms->avaliarBestVoice();            
         } catch (\Exception $th) {
             $resultBV = $th->getMessage();
         }
+
+        try {            
+            $resultZenvia = $sms->avaliarZenvia();            
+        } catch (\Exception $th) {
+            $resultZenvia = $th->getMessage();
+        }
+        
+
         $this->createLog($resultBV);
+        $this->createLog($resultZenvia);        
+    }
+
+    public function reavaliarSMS()
+    {
+        $sms = new SmsModel();
+
+        try {            
+            $resultReavBestVoice = $sms->reavaliarBestVoice();            
+        } catch (\Exception $th) {
+            $resultReavBestVoice = $th->getMessage();
+        }
+
+        $this->createLog($resultReavBestVoice);
     }
 
     /**

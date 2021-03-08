@@ -147,7 +147,15 @@
     let naoenviados = 0;    
 
     $('#btnBuscar').on('click', () => {        
+        updateCharts();
+    });  
+        
+    setInterval(function() {
+        updateCharts();        
+    }, 10 * 1000)
 
+    function updateCharts()
+    {
         $.ajax({
             method: "POST",
             url: "relatorio/buscarDatas",
@@ -186,7 +194,7 @@
         }).fail((jqxhr, textStatus) => {
             console.log(textStatus);
         });
-    });    
+    }
 </script>
 
 <!-- BAR CHART -->

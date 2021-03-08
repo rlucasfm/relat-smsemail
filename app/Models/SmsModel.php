@@ -108,12 +108,15 @@ class SmsModel extends Model
         foreach($naoAvaliados as $nv)
         {            
             try {
+                set_time_limit(300);
                 $response = $curl->setBody(json_encode(['id' => $nv->idsms]))
                                 ->request('POST', 'http://apishort.bestvoice.com.br/bot/consulta-sms-status.php', 
                                 ['headers' => [
                                     'usuario'   => $usuario,
                                     'chave'     => $chave
-                                ]]);         
+                                ],
+                                'connect_timeout' => 0,
+                                'timeout' => 0]);         
                 $sms_info = json_decode($response->getBody());
 
                 $statusDesc = $sms_info->statusDescricao;
@@ -135,8 +138,121 @@ class SmsModel extends Model
         }
 
         // Casos de sucesso, alterações completas ou sem alterações a fazer.
-        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações"   : $err_arr;  
-        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer"          : $return ;               
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - BestVoice"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer - BestVoice"          : $return ;               
+        return $return;
+        
+    }
+
+    /**
+     * Reavalia os registros em DB que já tem
+     * retorno da operadora (BestVoice) e atualiza
+     * os seus status.
+     * 
+     * Retorna logs de sucesso ou erro.
+     * 
+     * @var string
+     */
+    public function reavaliarBestVoice()
+    {
+        $curl = \Config\Services::curlrequest();
+        $usuario = 'MOTAESILVA';
+        $chave = 'B3stV0z84';
+
+        // Encontra os registros BestVoice por avaliar
+        $dataHj = new \DateTime(date('Y-m-d'));
+		$dataHj->modify('+1 day');
+		$dataHj = $dataHj->format('Y-m-d');
+
+        $naoAvaliados = $this->where('avaliado', 1)
+                            ->where('operadora', 'BestVoice')
+                            ->where('atualizado_em <=', $dataHj)
+                            ->findAll();
+        $err_arr = [];
+        
+        // Requere da API as informações de cada registro por ID
+        foreach($naoAvaliados as $nv)
+        {            
+            try {
+                set_time_limit(300);
+                $response = $curl->setBody(json_encode(['id' => $nv->idsms]))
+                                ->request('POST', 'http://apishort.bestvoice.com.br/bot/consulta-sms-status.php', 
+                                ['headers' => [
+                                    'usuario'   => $usuario,
+                                    'chave'     => $chave
+                                ],
+                                'connect_timeout' => 0,
+                                'timeout' => 0]);         
+                $sms_info = json_decode($response->getBody());
+
+                $statusDesc = $sms_info->statusDescricao;
+                $statusConf = $sms_info->confirmacaoDescricao;
+
+                // Atualização de INFO no DB
+                $data_update = [
+                    'id'         => $nv->id,
+                    'statusDesc' => $statusDesc,
+                    'statusConf' => $statusConf,
+                    'avaliado'   => 2
+                ];
+                $this->save($data_update);
+
+            } catch (\Exception $err) {
+                // Registro de erro individual
+                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+            }            
+        }
+
+        // Casos de sucesso, alterações completas ou sem alterações a fazer.
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - Reavaliar BestVoice"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer - Reavaliar BestVoice"          : $return ;               
+        return $return;
+        
+    }
+
+    /**
+     * Avalia os registros em DB que ainda não tem
+     * retorno da operadora (Zenvia) e atualiza
+     * os seus status.
+     * 
+     * Retorna logs de sucesso ou erro.
+     * 
+     * @var string
+     */
+    public function avaliarZenvia()
+    {        
+        $curl = \Config\Services::curlrequest();
+        $usuario = 'MOTAESILVA';
+        $chave = 'B3stV0z84';
+
+        // Encontra os registros Zenvia por avaliar
+        $naoAvaliados = $this->where('avaliado', 0)
+                            ->where('operadora', 'Zenvia')
+                            ->findAll();
+        $err_arr = [];
+        
+        // Requere da API as informações de cada registro por ID
+        foreach($naoAvaliados as $nv)
+        {            
+            try {
+                // Atualização de INFO no DB
+                $data_update = [
+                    'id'         => $nv->id,
+                    'statusDesc' => 'ZENVIA',
+                    'statusConf' => 'ZENVIA',
+                    'avaliado'   => 1
+                ];
+                $this->save($data_update);
+
+            } catch (\Exception $err) {
+                // Registro de erro individual
+                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+            }            
+        }
+
+        // Casos de sucesso, alterações completas ou sem alterações a fazer.
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - Zenvia"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer  - Zenvia"          : $return ;               
         return $return;
         
     }
