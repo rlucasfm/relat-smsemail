@@ -41,7 +41,7 @@ class FirebirdModel
      * a partir de um array de valores.
      * 
      * @param array
-     * @var integer
+     * @return integer
      */
     public function insert($arr_val)
     {
@@ -72,7 +72,7 @@ class FirebirdModel
      * a partir de um array de valores.
      * 
      * @param integer|array
-     * @var integer
+     * @return integer
      */
     public function update($id, $arr_val)
     {        
@@ -99,7 +99,7 @@ class FirebirdModel
      * haja uma chave primaria dentro do array.
      * 
      * @param array
-     * @var integer
+     * @return integer
      */
     public function save($arr_val)
     {
@@ -119,7 +119,7 @@ class FirebirdModel
      * Pode ser chained.
      * 
      * @param integer|string
-     * @var FirebirdModel
+     * @return FirebirdModel
      */
     public function where($key, $value)
     {
@@ -151,7 +151,7 @@ class FirebirdModel
      * definido.
      * 
      * @param integer
-     * @var array
+     * @return array
      */
     public function find($id=0)
     {
@@ -173,7 +173,7 @@ class FirebirdModel
      * Encontra todos os registros
      * da query definida,
      * 
-     * @var array
+     * @return array
      */
     public function findAll()
     {
@@ -191,7 +191,7 @@ class FirebirdModel
      * da query definida .
      * 
      * @param integer
-     * @var array
+     * @return array
      */
     public function first($count=1)
     {
@@ -209,7 +209,7 @@ class FirebirdModel
      * da query definida .
      * 
      * @param integer
-     * @var array
+     * @return array
      */
     public function last($count=1)
     {
@@ -227,7 +227,7 @@ class FirebirdModel
      * utilizando as informações de
      * configuração definido nas propriedades.
      * 
-     * @var Connection
+     * @return Connection
      */
     private function connect()
     {
@@ -240,7 +240,7 @@ class FirebirdModel
      * lidando com concorrências e 
      * garantindo integridade das transactions.
      * 
-     * @var Connection
+     * @return Connection
      */
     private function closeConnection()
     {
@@ -253,7 +253,7 @@ class FirebirdModel
      * SELECT retornando um array de
      * arrays associativos com os resultados.
      * 
-     * @var array 
+     * @return array 
      */
     private function queryFetch($query)
     {
@@ -298,7 +298,7 @@ class FirebirdModel
      * UPDATE, INSERT e DELETE, retornando
      * o número de linhas afetadas.
      * 
-     * @var integer
+     * @return integer
      */
     private function queryExec($query)
     {
@@ -321,7 +321,7 @@ class FirebirdModel
      * Encontra a última chave primária incremental
      * do banco, para inserir novos registros
      * 
-     * @var array
+     * @return array
      */
     private function findLastKey()
     {
