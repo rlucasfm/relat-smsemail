@@ -5,6 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" href="favicon.ico" />
     <title><?= esc($titulo) ?></title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
@@ -18,7 +19,7 @@
 <body>
     <section class="hero is-small is-link">
         <div class="hero-body">
-            <p class="title">Relatório de sms</p>
+            <p class="title">Relatório de SMS</p>
         </div>
     </section>
 
@@ -121,6 +122,39 @@
         </div>    
     </div> 
 
+    <div id="modal0" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+            <div class="box">
+            <article class="media">
+                <div class="media-content">
+                    <div class="content">
+                        <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.
+                        </p>
+                    </div>
+                </div>
+            </article>
+            </div>
+        </div>
+    <button class="modal-close is-large" aria-label="close" data-target="modal0"></button>
+    </div>
+
+<script>
+    function modalToggle(id){
+        let target = $('#'+id);
+        if(target.hasClass("is-active")){
+            target.removeClass("is-active");
+        } else {
+            target.addClass("is-active");
+        }
+    }
+
+    $('.modal-close').on('click', function() {
+        modalToggle($(this).attr('data-target'));
+    });
+</script>
+
 <script>
     $('#btnExport').on('click', () => {
         let form = $(document.createElement('form'));
@@ -205,7 +239,12 @@
             animations: {
                 speed: 600
             },
-            height: 300
+            height: 300,
+            events: {
+                dataPointSelection: function(event, chartContext, config){
+                    modalToggle('modal'+config.dataPointIndex);
+                }
+            }
         },
         dataLabels: {
             enabled: false
@@ -224,7 +263,7 @@
         },
         theme: {
             palette: 'palette1'
-        }
+        }        
     }
 
     let chart = new ApexCharts(document.querySelector(".graph1"), optionsBar);

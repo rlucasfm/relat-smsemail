@@ -9,6 +9,6 @@ class Eventos extends FirebirdModel
 
     public function achar()
     {
-        return $this->where('remessa', 2006171125)->last();
+        return $this->in('cod_evento', [9034, 9005, 9023])->first(10);
     }
 }

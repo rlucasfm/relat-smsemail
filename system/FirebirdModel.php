@@ -147,6 +147,32 @@ class FirebirdModel
     }
 
     /**
+     * Encontra os dados em um array de
+     * dados.
+     * 
+     * @param string $col_name
+     * @param array $in_array
+     * @return array
+     */
+    public function in($col_name, $in_arr)
+    {
+        $in_sql = '(';
+        foreach($in_arr as $in_k){
+            $in_sql .= "$in_k, ";
+        }
+        $in_sql = rtrim($in_sql, ', ').')';
+        
+        if( empty($this->qureyStr) )
+        {
+            $this->queryStr .= "WHERE $col_name IN $in_sql";
+        } else {
+            $this->queryStr .= "AND $col_name IN $in_sql"; 
+        }  
+
+        return $this;
+    }
+
+    /**
      * Encontra o registro com o PK
      * definido.
      * 
@@ -220,7 +246,7 @@ class FirebirdModel
         } catch (\Exception $th) {
             throw $th;
         } 
-    }
+    }    
 
     /**
      * Abre a conexão com o banco
@@ -255,7 +281,7 @@ class FirebirdModel
      * 
      * @return array 
      */
-    private function queryFetch($query)
+    public function queryFetch($query)
     {
         $this->connect();
 
@@ -300,7 +326,7 @@ class FirebirdModel
      * 
      * @return integer
      */
-    private function queryExec($query)
+    public function queryExec($query)
     {
         $this->connect();
 

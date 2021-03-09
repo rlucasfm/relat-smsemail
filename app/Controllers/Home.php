@@ -7,11 +7,11 @@ class Home extends BaseController
 {
 	public function index()
 	{
-		$user = new Eventos();
+		$evento = new Eventos();
 		try {
-			//echo "<pre>"; 
-			var_dump($user->achar());
-			//echo "</pre>";
+			echo "<pre>"; 
+			var_dump($evento->achar());
+			echo "</pre>";
 		} catch (\Exception $th) {
 			echo $th->getMessage();
 		}
