@@ -122,6 +122,10 @@ class SmsModel extends Model
                 $statusDesc = $sms_info->statusDescricao;
                 $statusConf = $sms_info->confirmacaoDescricao;
 
+                $statusConf = ($sms_info->confirmacaoDescricao == 'NAO_ENTREGUE') ? 'NAO_ENTREGUES' : $sms_info->confirmacaoDescricao;
+                $statusConf = ($sms_info->statusDescricao == 'DESCONHECIDO') ? 'DESCONHECIDO'       : $sms_info->statusDescricao;
+                $statusConf = ($sms_info->statusDescricao == 'REJEITADA') ? 'REJEITADA'             : $sms_info->statusDescricao;
+
                 // Atualização de INFO no DB
                 $data_update = [
                     'id'         => $nv->id,

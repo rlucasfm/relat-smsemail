@@ -35,6 +35,14 @@ class FirebirdModel
     protected $table;
     protected $primaryKey;
 
+    /**
+     * Utiliza a função queryExec() 
+     * para inserir dados na tabela
+     * a partir de um array de valores.
+     * 
+     * @param array
+     * @var integer
+     */
     public function insert($arr_val)
     {
         $pk = $this->findLastKey()+1;
@@ -58,6 +66,14 @@ class FirebirdModel
         }
     }
 
+     /**
+     * Utiliza a função queryExec() 
+     * para atualizar dados na tabela
+     * a partir de um array de valores.
+     * 
+     * @param integer|array
+     * @var integer
+     */
     public function update($id, $arr_val)
     {        
         $set = '';
@@ -76,6 +92,15 @@ class FirebirdModel
         }
     }
 
+    /**
+     * Define inteligentemente
+     * a utilização da função
+     * insert() ou update(), caso 
+     * haja uma chave primaria dentro do array.
+     * 
+     * @param array
+     * @var integer
+     */
     public function save($arr_val)
     {
         if( array_key_exists($this->primaryKey, $arr_val) )
@@ -88,6 +113,14 @@ class FirebirdModel
         }
     }
 
+    /**
+     * Define uma parte de query
+     * com cláusula WHERE.
+     * Pode ser chained.
+     * 
+     * @param integer|string
+     * @var FirebirdModel
+     */
     public function where($key, $value)
     {
         $arr_chars = ['>', '<', '=', '<=', '>=', '<>', 'is', 'not'];
@@ -113,6 +146,13 @@ class FirebirdModel
         return $this;
     }
 
+    /**
+     * Encontra o registro com o PK
+     * definido.
+     * 
+     * @param integer
+     * @var array
+     */
     public function find($id=0)
     {
         if(empty($this->queryStr))
@@ -129,6 +169,12 @@ class FirebirdModel
         }        
     }
 
+    /**
+     * Encontra todos os registros
+     * da query definida,
+     * 
+     * @var array
+     */
     public function findAll()
     {
         $query = "SELECT * FROM $this->table $this->queryStr";        
@@ -140,9 +186,16 @@ class FirebirdModel
         }    
     }
 
-    public function first()
+    /**
+     * Encontra os últimos $count registros
+     * da query definida .
+     * 
+     * @param integer
+     * @var array
+     */
+    public function first($count=1)
     {
-        $query = "SELECT FIRST 1 * FROM $this->table $this->queryStr";
+        $query = "SELECT FIRST $count * FROM $this->table $this->queryStr ORDER BY $this->primaryKey";
 
         try {
             return $this->queryFetch($query);                
@@ -151,18 +204,57 @@ class FirebirdModel
         } 
     }
 
+    /**
+     * Encontra os últimos $count registros
+     * da query definida .
+     * 
+     * @param integer
+     * @var array
+     */
+    public function last($count=1)
+    {
+        $query = "SELECT FIRST $count * FROM $this->table $this->queryStr ORDER BY $this->primaryKey DESC";
+
+        try {
+            return $this->queryFetch($query);                
+        } catch (\Exception $th) {
+            throw $th;
+        } 
+    }
+
+    /**
+     * Abre a conexão com o banco
+     * utilizando as informações de
+     * configuração definido nas propriedades.
+     * 
+     * @var Connection
+     */
     private function connect()
     {
         $this->connection = ibase_connect($this->db_file, $this->db_user, $this->db_pass) or die('Erro ao conectar:' . ibase_errmsg());        
         return $this->connection;
     }
 
+    /**
+     * Fecha a conexão com o banco
+     * lidando com concorrências e 
+     * garantindo integridade das transactions.
+     * 
+     * @var Connection
+     */
     private function closeConnection()
     {
         $this->connection = ibase_close();
         return $this->connection;
     }
 
+    /**
+     * Executa consultas SQL do tipo
+     * SELECT retornando um array de
+     * arrays associativos com os resultados.
+     * 
+     * @var array 
+     */
     private function queryFetch($query)
     {
         $this->connect();
@@ -201,6 +293,13 @@ class FirebirdModel
         $this->closeConnection();
     }    
 
+    /**
+     * Executa consultas SQL do tipo
+     * UPDATE, INSERT e DELETE, retornando
+     * o número de linhas afetadas.
+     * 
+     * @var integer
+     */
     private function queryExec($query)
     {
         $this->connect();
@@ -218,6 +317,12 @@ class FirebirdModel
         $this->closeConnection();
     }
 
+    /**
+     * Encontra a última chave primária incremental
+     * do banco, para inserir novos registros
+     * 
+     * @var array
+     */
     private function findLastKey()
     {
         $this->connect();

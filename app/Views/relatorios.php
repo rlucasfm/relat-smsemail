@@ -171,7 +171,7 @@
                     enviados++;
                 }
 
-                if(obj.statusConf == 'NAO_ENTREGUE' || obj.statusDesc == 'DESCONHECIDO' || obj.statusDesc == 'REJEITADA'){
+                if(obj.statusConf == 'NAO_ENTREGUES' || obj.statusConf == 'DESCONHECIDO' || obj.statusConf == 'REJEITADA'){
                     naoenviados++;
                 }
 
