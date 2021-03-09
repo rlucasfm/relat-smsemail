@@ -32,6 +32,7 @@ class Relatorio extends BaseController
 
 		$id_banco = $this->request->getPost('id_banco') ?? "";
 		$dataInicio = $this->request->getPost('dataInicio');
+		
 		$dataFim = $this->request->getPost('dataFim');
 		$dataFim = new \DateTime($dataFim);
 		$dataFim->modify('+1 day');

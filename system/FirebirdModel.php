@@ -164,7 +164,7 @@ class FirebirdModel
         
         if( empty($this->qureyStr) )
         {
-            $this->queryStr .= "WHERE $col_name IN $in_sql";
+            $this->queryStr = "WHERE $col_name IN $in_sql";
         } else {
             $this->queryStr .= "AND $col_name IN $in_sql"; 
         }  

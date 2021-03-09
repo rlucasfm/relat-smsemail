@@ -7,8 +7,12 @@ class Eventos extends FirebirdModel
     protected $table = "EVENTOSCOBRANCA";
     protected $primaryKey = "DATAHORA";
 
-    public function achar()
+    public function respondentes($arr)
     {
-        return $this->in('cod_evento', [9034, 9005, 9023])->first(10);
+        try {
+            return $this->in('cliente', $arr)->where('cod_evento', 5)->findAll();
+        } catch (\Exception $err) {
+            throw $err;
+        }        
     }
 }

@@ -267,7 +267,7 @@ class SmsModel extends Model
      * 
      * @var array
      */
-    public function buscarDatas($dataInicio, $dataFim, $id_banco)
+    public function buscarDatas($dataInicio, $dataFim, $id_banco = "")
     {
         try {
             if($id_banco == "")
