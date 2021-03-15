@@ -11,23 +11,25 @@ class Home extends BaseController
 		$sms 	= new SmsModel();
 		$evento = new Eventos();
 		
-		// Recupera cada id de cliente entre as datas
-		$regs_clientes = $sms->buscarDatas('2021-03-01', '2021-03-09');
-		$ids_arr = array();
-		foreach($regs_clientes as $rc)
-		{
-			if($rc->clienteid != "Zenvia")
-			{
-				$ids_arr[] = $rc->clienteid;
-			}
-		}
-		$ids_arr = array_unique($ids_arr);
-		
 		try {
-			$resp = $evento->respondentes($ids_arr);
+			$result = $evento->verificarID("48973", 9023);
+			echo "<pre>";
+			var_dump($result);
+			echo "</pre>";
 		} catch (\Exception $th) {
-			echo $th->getMessage();
+			throw $th;
 		}
+
+		// $rs = $evento->verificarEvento($ids, $code, $diabusca, $banco);							
+		// if(gettype($rs) == "object")
+		// {
+		// 	$evtResp[$code][] = $rs;
+		// }	
+		// else
+		// {
+		// 	$evtResp[$code] = array_merge($evtResp[$code], $rs);
+		// }	
+		
 		
 	}
 }

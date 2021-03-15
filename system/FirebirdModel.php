@@ -203,10 +203,11 @@ class FirebirdModel
      */
     public function findAll()
     {
-        $query = "SELECT * FROM $this->table $this->queryStr";        
+        $query = "SELECT * FROM $this->table $this->queryStr;";        
         
-        try {
+        try {                          
             return $this->queryFetch($query);                
+            // return $query;            
         } catch (\Exception $th) {
             throw $th;
         }    
@@ -246,7 +247,24 @@ class FirebirdModel
         } catch (\Exception $th) {
             throw $th;
         } 
-    }    
+    }   
+    
+    /**
+     * Conta o nome de registros na consulta
+     * realizada
+     *      
+     * @return integer
+     */
+    public function count()
+    {
+        $query = "SELECT count($this->primaryKey) FROM $this->table $this->queryStr";
+
+        try {
+            return $this->queryFetch($query);                
+        } catch (\Exception $th) {
+            throw $th;
+        } 
+    }   
 
     /**
      * Abre a conexão com o banco
@@ -296,7 +314,7 @@ class FirebirdModel
         try {
             $result_arr = array();
             $row_count = 0;
-
+            
             while($row = ibase_fetch_object($res))
             {            
                 $result_arr[] = $row;

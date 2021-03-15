@@ -9,19 +9,40 @@
     <title><?= esc($titulo) ?></title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
-    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>    
+    <link href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css' rel='stylesheet'>      
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>    
+    <script src="popover.js"></script>  
     
-</head>
+    <style>
+        .s-pre-con{
+            display: none;
+            z-index: 99999;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;      
+            background: rgba(220, 230, 232, 0.6);               
+        }
+        .s-pre-con img{
+            height: 50px; 
+            width: 50px;
+            z-index: 10;
+            position: absolute;
+            left: 50%;
+            top: 35%;
+        }
+    </style>
 
-<body>
+</head>
+<body>    
     <section class="hero is-small is-link">
         <div class="hero-body">
             <p class="title">Relatório de SMS</p>
         </div>
-    </section>
+    </section>    
 
     <div class="container is-fluid mt-4">
         <div class="columns">
@@ -106,42 +127,185 @@
                 </div>
             </div>
             <div class="column">
-                <div class="card">
-                    <div class="card-content">                        
-                        <div class="columns">
-                            Exporte a tabela com os dados entre as datas escolhidas
-                        </div>
-                        <div class="columns">
-                            <div class="column has-text-centered">                            
-                                <button type="button" class="button is-success" id="btnExport">Exportar XLSX</button>
-                            </div>                            
+                <div class="columns">
+                    <div class="card">
+                        <div class="card-content">                        
+                            <div class="columns">
+                                Exporte a tabela com os dados entre as datas escolhidas
+                            </div>
+                            <div class="columns">
+                                <div class="column has-text-centered">                            
+                                    <button type="button" class="button is-success" id="btnExport">Exportar XLSX</button>
+                                </div>                            
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>    
+                <div class="columns mt-1">
+                    <div class="card" style="width: 100%;">
+                        <header class="card-header">
+                            <h5 class="card-header-title">Relatório de eventos</h5>
+                        </header>
+                        <div class="card-content">                        
+                            <div class="columns">
+                                Confira os eventos relacionados ao sms enviados
+                            </div>
+                            <div class="columns">
+                                <div class="column has-text-centered">                            
+                                    <button type="button" class="button is-success" onclick="toggleModal('modal-eventos')" id="btnEventos">Abrir</button>
+                                </div>                            
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+            </div>            
+        </div>
     </div> 
 
-    <div id="modal0" class="modal">
+    <div class="modal" id="modal-eventos">
         <div class="modal-background"></div>
-        <div class="modal-content">
-            <div class="box">
-            <article class="media">
-                <div class="media-content">
-                    <div class="content">
-                        <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean efficitur sit amet massa fringilla egestas. Nullam condimentum luctus turpis.
-                        </p>
+        <div class="modal-card">
+            <header class="modal-card-head">
+            <p class="modal-card-title">Relatório de Eventos</p>
+            <button type="button" class="mod-close delete" aria-label="close" data-target="modal-eventos"></button>
+            </header>
+            <section class="modal-card-body">
+                <div class="columns mt-1 ml-2 has-text-centered is-vcentered">
+                    <div class="column">
+                        <button type="button" class="button is-link" id="btnEventSelect">Selecionar eventos</button>
                     </div>
+                    <div class="column">
+                        <div class="columns has-text-centered is-vcentered">
+                            <div class="column">
+                                <div class="field mb-5">
+                                    <label for="diasAte">Dias a considerar</label>
+                                    <div class="control">
+                                        <input type="number" class="input" id="diasate" name="diasate" value="1">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column">
+                                <button class="button is-primary" id="btnBuscarEvent">Buscar</button>
+                            </div>
+                        </div>                                            
+                    </div>                    
                 </div>
-            </article>
-            </div>
+                <hr>
+                <div class="columns mt-1 ml-2">
+
+                    <table class="table is-striped">
+                        <thead id="tabHead"></thead>
+                        <tbody id="tabBody"></tbody>
+                    </table>
+
+                </div>
+            </section>
+            <footer class="modal-card-foot">            
+                <button type="button" class="button is-success" id="btnExportEvent">Exportar XLSX</button>
+                <button type="button" class="button mod-close" data-target="modal-eventos">Fechar</button>
+            </footer>
         </div>
-    <button class="modal-close is-large" aria-label="close" data-target="modal0"></button>
     </div>
 
+    <div class='s-pre-con'>
+        <img src="loader.gif" alt="Loading cool animation">
+    </div>            
+                       
 <script>
-    function modalToggle(id){
+
+    $('#btnEventSelect').fu_popover({
+        title: 'Eventos',        
+        placement: 'right',
+        dismissable: true,
+        width: '240px',
+        content: `
+        <form id="eventosRelat">
+            <div class="columns">
+                <div class="column">
+                    <label class="checkbox"><input type="checkbox" name="5" value="true" id="check5" checked> 5</label>                
+                </div>
+                <div class="column">
+                    <label class="checkbox"><input type="checkbox" name="31" value="true" id="check31"> 31</label>                
+                </div>
+                <div class="column">
+                    <label class="checkbox"><input type="checkbox" name="9023" value="true" id="check9023"> 9023</label>               
+                </div>
+            </div> 
+            <div class="columns">
+                <div class="column">
+                    <label class="checkbox"><input type="checkbox" name="9005" value="true" id="check9005"> 9005</label>
+                </div>
+                <div class="column">
+                    <label class="checkbox"><input type="checkbox" name="9034" value="true" id="check9034"> 9034</label>
+                </div>
+            </div>
+        </form>
+        `
+    });   
+    
+    $('#btnBuscarEvent').on('click', function(){
+        let dataForm = $('#eventosRelat').serializeArray();
+        $('.s-pre-con').show();
+        reqEventos(dataForm, 'relatorio/buscarEventos', function(counts){            
+            let htmlHead = `<tr><th><abbr title="Código">Cod.</abbr></th>`;
+            let htmlBody = `<tr><th><abbr title="Quantidade">Qnt.</abbr></th>`;
+            Object.keys(counts).forEach((element, index) => {
+                htmlHead += `<th>${element}</th>`;
+                htmlBody += `<td>${counts[element]}</td>`;
+            });
+            htmlHead += "</tr>";
+            htmlBody += "</tr>";
+            $('#tabHead').html(htmlHead);
+            $('#tabBody').html(htmlBody);
+        });               
+    });
+
+    $('#btnExportEvent').on('click', function(){
+        let dataForm = $('#eventosRelat').serializeArray();
+        dataForm = JSON.stringify(dataForm);
+
+        let form = $(document.createElement('form'));
+
+        form.attr('action', 'relatorio/exportEventos');
+        form.attr('method', 'POST');
+        form.attr('target', '_blank');
+        let datainicio = $('<input>').attr('type', 'hidden').attr('name', 'datainicio').val($('#datainicio').val());
+        let datafim = $('<input>').attr('type', 'hidden').attr('name', 'datafim').val($('#datafim').val());
+        let banco = $('<input>').attr('type', 'hidden').attr('name', 'banco').val($('#banco').val());
+        let eventos = $('<input>').attr('type', 'hidden').attr('name', 'eventos').val(dataForm);
+        let diasate = $('<input>').attr('type', 'hidden').attr('name', 'diasate').val($('#diasate').val());
+        form.append(datainicio);
+        form.append(datafim);
+        form.append(banco);
+        form.append(eventos);
+        form.append(diasate);
+        form.appendTo(document.body);
+        form.submit();
+        form.remove();
+    });
+</script>
+
+<script>
+    function reqEventos(dataF, endpoint,callback){    
+       $.ajax({
+           method: 'POST',
+           url: endpoint,
+           data: {codes: dataF, dataInicio: $('#datainicio').val(), dataFim: $('#datafim').val(), diasate: $('#diasate').val(), banco: $('#banco').val()}
+       }).done((dataRes) => {
+            $('.s-pre-con').hide();
+           //console.log(dataRes);
+           counts = JSON.parse(dataRes);           
+           callback(counts, dataRes);
+       }).fail(function(jqXHR, textStatus, errorThrown) {
+            $('.s-pre-con').hide();
+            console.log("Error: "+textStatus);
+            callback({});
+       });
+   }
+</script>
+
+<script>    
+    function toggleModal(id){
         let target = $('#'+id);
         if(target.hasClass("is-active")){
             target.removeClass("is-active");
@@ -150,8 +314,8 @@
         }
     }
 
-    $('.modal-close').on('click', function() {
-        modalToggle($(this).attr('data-target'));
+    $('.mod-close').on('click', function() {
+        toggleModal($(this).attr('data-target'));
     });
 </script>
 
@@ -240,9 +404,10 @@
                 speed: 600
             },
             height: 300,
+            // Capturar cliques nas barras
             events: {
                 dataPointSelection: function(event, chartContext, config){
-                    modalToggle('modal'+config.dataPointIndex);
+                    console.log('Click: '+config.dataPointIndex);
                 }
             }
         },
@@ -350,7 +515,6 @@
     var rad3 = new ApexCharts(document.querySelector(".nao-avaliados"), optRad3);
     rad3.render();
 
-    
 </script>
 
 </body>

@@ -37,7 +37,7 @@ class SmsModel extends Model
                 
                 $save_data = [
                     "celular" => $data_arr['numero'],
-                    "mensagem"=> substr($data_arr['mensagem'], 0, -3),
+                    "mensagem"=> str_replace("=","",substr($data_arr['mensagem'], 0, -3)),
                     "clienteid" => $data_arr['clienteid'],
                     "idsms" => str_replace('=','', trim($id)),
                     "operadora" => 'BestVoice',
@@ -52,7 +52,7 @@ class SmsModel extends Model
                 // Zenvia
                 $save_data = [
                     "celular" => $data_arr['numero'],
-                    "mensagem"=> substr($data_arr['mensagem'], 0, -3),
+                    "mensagem"=> str_replace("=","",substr($data_arr['mensagem'], 0, -3)),
                     "clienteid" => $data_arr['clienteid'],
                     "idsms" => 'Zenvia',
                     "operadora" => 'Zenvia',
@@ -122,9 +122,9 @@ class SmsModel extends Model
                 $statusDesc = $sms_info->statusDescricao;
                 $statusConf = $sms_info->confirmacaoDescricao;
 
-                $statusConf = ($sms_info->confirmacaoDescricao == 'NAO_ENTREGUE') ? 'NAO_ENTREGUES' : $sms_info->confirmacaoDescricao;
-                $statusConf = ($sms_info->statusDescricao == 'DESCONHECIDO') ? 'DESCONHECIDO'       : $sms_info->statusDescricao;
-                $statusConf = ($sms_info->statusDescricao == 'REJEITADA') ? 'REJEITADA'             : $sms_info->statusDescricao;
+                $statusConf = ($sms_info->confirmacaoDescricao == 'NAO_ENTREGUE')   ? 'NAO_ENTREGUES'   : $statusConf;
+                $statusConf = ($sms_info->statusDescricao == 'DESCONHECIDO')        ? 'DESCONHECIDO'    : $statusConf;
+                $statusConf = ($sms_info->statusDescricao == 'REJEITADA')           ? 'REJEITADA'       : $statusConf;
 
                 // Atualização de INFO no DB
                 $data_update = [
@@ -137,13 +137,13 @@ class SmsModel extends Model
 
             } catch (\Exception $err) {
                 // Registro de erro individual
-                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+                array_push($err_arr, "\nERROR - ".date("Y-m-d H:i:s")." --> Houve uma falha: ".$err->getMessage());
             }            
         }
 
         // Casos de sucesso, alterações completas ou sem alterações a fazer.
-        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - BestVoice"   : $err_arr;  
-        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer - BestVoice"          : $return ;               
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Sucesso em todas as atualizações - BestVoice"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Nenhuma alteração a fazer - BestVoice"          : $return ;               
         return $return;
         
     }
@@ -192,6 +192,10 @@ class SmsModel extends Model
                 $statusDesc = $sms_info->statusDescricao;
                 $statusConf = $sms_info->confirmacaoDescricao;
 
+                $statusConf = ($sms_info->confirmacaoDescricao == 'NAO_ENTREGUE')   ? 'NAO_ENTREGUES'   : $statusConf;
+                $statusConf = ($sms_info->statusDescricao == 'DESCONHECIDO')        ? 'DESCONHECIDO'    : $statusConf;
+                $statusConf = ($sms_info->statusDescricao == 'REJEITADA')           ? 'REJEITADA'       : $statusConf;
+
                 // Atualização de INFO no DB
                 $data_update = [
                     'id'         => $nv->id,
@@ -203,13 +207,13 @@ class SmsModel extends Model
 
             } catch (\Exception $err) {
                 // Registro de erro individual
-                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+                array_push($err_arr, "\nERROR - ".date("Y-m-d H:i:s")." --> Houve uma falha: ".$err->getMessage());
             }            
         }
 
         // Casos de sucesso, alterações completas ou sem alterações a fazer.
-        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - Reavaliar BestVoice"   : $err_arr;  
-        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer - Reavaliar BestVoice"          : $return ;               
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Sucesso em todas as atualizações - Reavaliar BestVoice"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Nenhuma alteração a fazer - Reavaliar BestVoice"          : $return ;               
         return $return;
         
     }
@@ -250,13 +254,13 @@ class SmsModel extends Model
 
             } catch (\Exception $err) {
                 // Registro de erro individual
-                array_push($err_arr, "\nERROR - ".date("Y-m-d h:i:s")." --> Houve uma falha: ".$err->getMessage());
+                array_push($err_arr, "\nERROR - ".date("Y-m-d H:i:s")." --> Houve uma falha: ".$err->getMessage());
             }            
         }
 
         // Casos de sucesso, alterações completas ou sem alterações a fazer.
-        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Sucesso em todas as atualizações - Zenvia"   : $err_arr;  
-        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d h:i:s")." --> Nenhuma alteração a fazer  - Zenvia"          : $return ;               
+        $return = (empty($err_arr))         ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Sucesso em todas as atualizações - Zenvia"   : $err_arr;  
+        $return = (empty($naoAvaliados))    ? "\nNOTICE - ".date("Y-m-d H:i:s")." --> Nenhuma alteração a fazer  - Zenvia"          : $return ;               
         return $return;
         
     }
